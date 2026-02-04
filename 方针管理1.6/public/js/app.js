@@ -9,6 +9,9 @@ let state = {
     departments: [],
     users: [],
     alerts: [],
+    statusFilter: 'all',
+    sortBy: 'default',
+    compactMode: false,
     // 添加缓存避免重复请求
     lastRequestKey: '',
     cachedData: null,
@@ -55,6 +58,34 @@ function debounce(func, delay) {
         clearTimeout(timer);
         timer = setTimeout(() => func.apply(this, args), delay);
     };
+}
+
+function setStatusFilter(status) {
+    state.statusFilter = status;
+    document.querySelectorAll('#statusFilter .filter-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.status === status);
+    });
+    filterData();
+}
+
+function onSortChange() {
+    const sortValue = document.getElementById('sortFilter').value;
+    state.sortBy = sortValue;
+    filterData();
+}
+
+function toggleCompactMode() {
+    state.compactMode = !state.compactMode;
+    const container = document.getElementById('cardsContainer');
+    const toggleButton = document.getElementById('densityToggle');
+    if (container) {
+        container.classList.toggle('compact', state.compactMode);
+    }
+    if (toggleButton) {
+        toggleButton.classList.toggle('active', state.compactMode);
+        toggleButton.textContent = state.compactMode ? '🗂️ 标准模式' : '🗂️ 紧凑模式';
+    }
+    updateFilterSummary(state.filteredCount || 0, state.allData.length);
 }
 
 // 初始化应用 - 优化版：并行加载
@@ -243,6 +274,10 @@ async function filterData() {
                     kpi.user_name.toLowerCase().includes(search)
                 );
             }
+
+            filteredData = applyStatusFilter(filteredData);
+            filteredData = applySort(filteredData);
+            state.filteredCount = filteredData.length;
             console.log('筛选后数据条数:', filteredData.length);
 
             // 优化：直接从已获取的数据中更新用户列表，避免重复请求
@@ -262,6 +297,7 @@ async function filterData() {
             // 渲染视图
             renderCards(filteredData);
             renderStats(filteredData);
+            updateFilterSummary(filteredData.length, state.allData.length);
 
             // 如果当前在图表视图，重新加载图表数据
             const chartView = document.getElementById('chartView');
@@ -332,10 +368,127 @@ function updateUserList(data) {
     }
 }
 
+function getCompletionInfo(kpi) {
+    const kpiDirection = getKpiDirection(kpi);
+    const targetVal = parseFloat(kpi.target_value);
+    const actualVal = parseFloat(kpi.actual_value);
+    const isEmpty = Number.isNaN(targetVal) || Number.isNaN(actualVal);
+    let completionRate = 0;
+
+    if (!isEmpty && targetVal > 0 && actualVal > 0) {
+        completionRate = actualVal / targetVal;
+    }
+
+    const statusClass = getCompletionStatusClass(completionRate, kpiDirection, targetVal, actualVal);
+
+    return {
+        completionRate,
+        statusClass,
+        isEmpty,
+        targetVal,
+        actualVal
+    };
+}
+
+function applyStatusFilter(data) {
+    if (state.statusFilter === 'all') {
+        return data;
+    }
+
+    return data.filter(kpi => {
+        const info = getCompletionInfo(kpi);
+        if (state.statusFilter === 'empty') {
+            return info.isEmpty;
+        }
+        return info.statusClass === state.statusFilter;
+    });
+}
+
+function applySort(data) {
+    if (state.sortBy === 'default') {
+        return data;
+    }
+
+    const sorted = [...data];
+    const sortKey = (kpi, key) => {
+        const info = getCompletionInfo(kpi);
+        if (key === 'completion') {
+            return info.isEmpty ? -Infinity : info.completionRate;
+        }
+        if (key === 'target') {
+            return Number.isNaN(info.targetVal) ? -Infinity : info.targetVal;
+        }
+        if (key === 'actual') {
+            return Number.isNaN(info.actualVal) ? -Infinity : info.actualVal;
+        }
+        return 0;
+    };
+
+    const [key, direction] = state.sortBy.split('-');
+    sorted.sort((a, b) => {
+        const valA = sortKey(a, key);
+        const valB = sortKey(b, key);
+        if (valA === valB) return 0;
+        return direction === 'asc' ? valA - valB : valB - valA;
+    });
+    return sorted;
+}
+
+function getStatusLabel() {
+    const map = {
+        all: '全部',
+        excellent: '达标',
+        good: '警告',
+        poor: '未达标',
+        empty: '空白'
+    };
+    return map[state.statusFilter] || '全部';
+}
+
+function getSortLabel() {
+    const map = {
+        default: '默认',
+        'completion-desc': '达成率高→低',
+        'completion-asc': '达成率低→高',
+        'target-desc': '目标值高→低',
+        'target-asc': '目标值低→高',
+        'actual-desc': '实际值高→低',
+        'actual-asc': '实际值低→高'
+    };
+    return map[state.sortBy] || '默认';
+}
+
+function updateFilterSummary(filteredCount, totalCount) {
+    const date = document.getElementById('dateFilter')?.value || '';
+    const department = document.getElementById('departmentFilter')?.value || '';
+    const user = document.getElementById('userFilter')?.value || '';
+    const search = document.getElementById('searchInput')?.value.trim() || '';
+    const summary = document.getElementById('filterSummary');
+
+    if (!summary) return;
+
+    const chips = [];
+    if (date) chips.push(`日期：${date}`);
+    if (department && department !== 'all') chips.push(`部门：${department}`);
+    if (user && user !== 'all') chips.push(`人员：${user}`);
+    if (search) chips.push(`搜索：“${search}”`);
+    if (state.statusFilter !== 'all') chips.push(`状态：${getStatusLabel()}`);
+    if (state.sortBy !== 'default') chips.push(`排序：${getSortLabel()}`);
+    if (state.compactMode) chips.push('模式：紧凑');
+
+    summary.innerHTML = `
+        <div class="summary-text">筛选结果 ${filteredCount} / ${totalCount} 条</div>
+        <div class="summary-chips">
+            ${chips.map(chip => `<span class="summary-chip">${chip}</span>`).join('')}
+        </div>
+    `;
+}
+
 // 渲染卡片视图
 function renderCards(data) {
     const container = document.getElementById('cardsContainer');
 
+    container.classList.toggle('compact', state.compactMode);
     if (data.length === 0) {
         container.innerHTML = '<div class="empty-state">暂无数据</div>';
         return;
@@ -346,25 +499,19 @@ function renderCards(data) {
 
 // 创建KPI卡片
 function createKpiCard(kpi) {
-    // 获取KPI方向（兼容历史数据方向错误的问题）
-    const kpiDirection = getKpiDirection(kpi);
+    const info = getCompletionInfo(kpi);
+    const completionRate = info.completionRate * 100;
+    const displayRate = info.isEmpty ? '—' : completionRate.toFixed(2);
 
-    // 根据正反向指标，用原始数据计算达成率
-    // 统一公式：达成率 = 实际值 / 目标值 × 100%
-    let completionRate = 0;
-    const targetVal = parseFloat(kpi.target_value) || 0;
-    const actualVal = parseFloat(kpi.actual_value) || 0;
-
-    if (targetVal > 0 && actualVal > 0) {
-        // 统一使用 实际/目标 × 100%，正反向指标只在状态判断时有区别
-        completionRate = (actualVal / targetVal) * 100;
-    }
-
-    const displayRate = completionRate.toFixed(2);
-
-    // 状态判断使用原始比率（completionRate / 100），传入目标和实际值用于特殊判断
-    const statusClass = getCompletionStatusClass(completionRate / 100, kpiDirection, targetVal, actualVal);
-    const statusIcon = getCompletionStatusIcon(completionRate / 100, kpiDirection, targetVal, actualVal);
+    const statusClass = info.isEmpty ? 'empty' : info.statusClass;
+    const statusIcon = info.isEmpty
+        ? '⚪'
+        : getCompletionStatusIcon(
+            info.completionRate,
+            getKpiDirection(kpi),
+            info.targetVal,
+            info.actualVal
+        );
     // 进度条宽度
     const progressWidth = Math.min(completionRate || 0, 200);
 
@@ -414,35 +561,19 @@ function renderStats(data) {
         stats.departments.add(kpi.department);
         stats.users.add(kpi.user_name);
 
-        // 获取KPI方向（与createKpiCard中的逻辑保持一致）
-        const kpiDirection = getKpiDirection(kpi);
+        const info = getCompletionInfo(kpi);
 
-        // 根据正反向指标计算达成率
-        // 统一公式：达成率 = 实际值 / 目标值 × 100%
-        let completionRate = 0;
-        const targetVal = parseFloat(kpi.target_value) || 0;
-        const actualVal = parseFloat(kpi.actual_value) || 0;
-
-        if (targetVal > 0 && actualVal > 0) {
-            // 统一使用 实际/目标，正反向指标只在状态判断时有区别
-            completionRate = (actualVal / targetVal);
+        if (info.isEmpty) {
+            stats.empty++;
+            return;
         }
 
-        // 使用计算出的达成率判断状态
-        const statusClass = getCompletionStatusClass(completionRate, kpiDirection, targetVal, actualVal);
-
-        if (statusClass === 'excellent') {
+        if (info.statusClass === 'excellent') {
             stats.excellent++;
-        } else if (statusClass === 'good') {
+        } else if (info.statusClass === 'good') {
             stats.good++;
         } else {
             stats.poor++;
-        }
-
-        // 检查是否为空值（⚪）
-        if (kpi.target_value === null || kpi.target_value === undefined ||
-            kpi.actual_value === null || kpi.actual_value === undefined) {
-            stats.empty++;
         }
     });
 
