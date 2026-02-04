@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方针管理KPI日经营看板</title>
+    <!-- 性能优化: 关键资源预加载 -->
+    <link rel="preload" href="css/style.css" as="style">
+    <link rel="preload" href="js/app.js" as="script">
+    <link rel="preload" href="js/charts.js" as="script">
+    <link rel="preload" href="js/chart.umd.js" as="script">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 使用本地 chart.js 而非 CDN，避免网络依赖问题 -->
+    <script src="js/chart.umd.js"></script>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="header">
+        <div class="header-left">
+            <h1 class="logo">方针管理KPI日经营看板</h1>
+        </div>
+        <div class="header-right">
+            <div class="alert-badge" id="alertBadge" onclick="showAlerts()">
+                <span class="alert-icon">🔔</span>
+                <span class="alert-count" id="alertCount">0</span>
+            </div>
+            <button class="btn-refresh" onclick="refreshData()">🔄 刷新</button>
+            <button class="btn-export" onclick="exportMobileHTML()">📱 导出移动版</button>
+        </div>
+    </header>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+        <div class="filter-group">
+            <label>📅 日期:</label>
+            <select id="dateFilter" class="filter-select" onchange="filterData()">
+                <option value="">加载中...</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>🏢 部门:</label>
+            <select id="departmentFilter" class="filter-select" onchange="onDepartmentChange()">
+                <option value="all">全部部门</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>👤 人员:</label>
+            <select id="userFilter" class="filter-select" onchange="filterData()">
+                <option value="all">全部人员</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>🔍 搜索:</label>
+            <input type="text" id="searchInput" class="filter-input" placeholder="搜索KPI名称..." oninput="debouncedFilterData()">
+        </div>
+    </div>
+
+    <!-- 视图切换 -->
+    <div class="view-tabs">
+        <button class="view-tab active" data-view="daily" onclick="switchView('daily')">📋 日看板</button>
+        <button class="view-tab" data-view="cards" onclick="switchView('cards')">📊 卡片视图</button>
+        <button class="view-tab" data-view="chart" onclick="switchView('chart')">📈 图表视图</button>
+        <button class="view-tab" data-view="hierarchy" onclick="switchView('hierarchy')">🏗️ 层级展开</button>
+        <button class="view-tab" data-view="stats" onclick="switchView('stats')">📉 统计概览</button>
+        <button class="view-tab" data-view="report" onclick="switchView('report')">📄 报告视图</button>
+    </div>
+
+    <!-- 加载中提示 -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>加载数据中...</p>
+    </div>
+
+    <!-- 卡片视图 -->
+    <div id="cardsView" class="view-content active">
+        <div class="stats-overview" id="statsOverview"></div>
+        <div class="cards-container" id="cardsContainer"></div>
+    </div>
+
+    <!-- 图表视图 -->
+    <div id="chartView" class="view-content">
+        <div class="chart-controls">
+            <select id="chartType" class="filter-select" onchange="onChartTypeChange()">
+                <option value="line">趋势图</option>
+                <option value="bar">对比图</option>
+            </select>
+            <select id="chartPeriod" class="filter-select" onchange="updateChart()">
+                <option value="7" selected>最近7天</option>
+                <option value="15">最近15天</option>
+                <option value="30">最近30天</option>
+                <option value="60">最近60天</option>
+                <option value="week">本周</option>
+                <option value="month">本月</option>
+                <option value="quarter">本季度</option>
+                <option value="year">本年度</option>
+            </select>
+            <select id="chartUser" class="filter-select" onchange="onChartUserChange()">
+                <option value="">选择人员...</option>
+            </select>
+            <select id="chartKpi" class="filter-select" onchange="updateChart()">
+                <option value="">选择KPI...</option>
+            </select>
+        </div>
+        <div class="chart-container">
+            <canvas id="mainChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 日看板视图 -->
+    <div id="dailyView" class="view-content">
+        <div class="daily-container" id="dailyContainer">
+            <div class="empty-state">请选择人员查看日看板</div>
+        </div>
+    </div>
+
+    <!-- 层级展开视图 -->
+    <div id="hierarchyView" class="view-content">
+        <!-- 层级视图独立筛选器 -->
+        <div class="hierarchy-filters">
+            <div class="filter-group">
+                <label>📅 日期:</label>
+                <select id="hierarchyDateFilter" class="filter-select" onchange="hierarchyFilterData()">
+                    <option value="">加载中...</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>🏢 部门:</label>
+                <select id="hierarchyDeptFilter" class="filter-select" onchange="hierarchyFilterData()">
+                    <option value="all">全部部门</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>👤 人员:</label>
+                <select id="hierarchyUserFilter" class="filter-select" onchange="hierarchyFilterData()">
+                    <option value="all">全部人员</option>
+                </select>
+            </div>
+        </div>
+        <div class="hierarchy-controls">
+            <div class="hierarchy-info">
+                <span class="hierarchy-legend">
+                    <span class="legend-item"><span class="legend-badge level-1">【总】</span> 总经理级</span>
+                    <span class="legend-item"><span class="legend-badge level-2">【部】</span> 部门经理级</span>
+                    <span class="legend-item"><span class="legend-badge level-3">【岗】</span> 员工级</span>
+                </span>
+            </div>
+            <button class="btn-collapse-all" onclick="collapseAllHierarchy()">📁 全部收起</button>
+        </div>
+        <div class="hierarchy-container" id="hierarchyContainer">
+            <div class="empty-state">加载数据中...</div>
+        </div>
+    </div>
+
+    <!-- 统计视图 -->
+    <div id="statsView" class="view-content">
+        <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <!-- 报告视图 -->
+    <div id="reportView" class="view-content">
+        <!-- 报告筛选器 -->
+        <div class="report-filters">
+            <div class="filter-group">
+                <label>📅 日期模式:</label>
+                <select id="reportDateMode" class="filter-select" onchange="reportFilterData()">
+                    <option value="day">日视图</option>
+                    <option value="week">周视图</option>
+                </select>
+            </div>
+            <div class="filter-group" id="reportDateGroup">
+                <label>📅 日期:</label>
+                <select id="reportDateFilter" class="filter-select" onchange="reportFilterData()">
+                    <option value="">加载中...</option>
+                </select>
+            </div>
+            <div class="filter-group" id="reportWeekGroup" style="display:none;">
+                <label>📅 周:</label>
+                <select id="reportWeekFilter" class="filter-select" onchange="reportFilterData()">
+                    <option value="">加载中...</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>👤 人员:</label>
+                <select id="reportUserFilter" class="filter-select" onchange="reportFilterData()">
+                    <option value="">选择人员...</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <button class="btn-export" onclick="exportReportPDF()">📄 导出PDF</button>
+            </div>
+        </div>
+        <!-- 报告容器 -->
+        <div class="report-container" id="reportContainer">
+            <div class="empty-state">请选择人员查看报告</div>
+        </div>
+    </div>
+
+    <!-- 提醒弹窗 -->
+    <div id="alertModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔔 提醒通知</h2>
+                <button class="modal-close" onclick="closeAlertModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="alertList"></div>
+        </div>
+    </div>
+
+    <!-- KPI详情弹窗 -->
+    <div id="kpiModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="kpiModalTitle">KPI详情</h2>
+                <button class="modal-close" onclick="closeKpiModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="kpiModalBody"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js?v=32"></script>
+    <script src="js/charts.js?v=19"></script>
+</body>
+</html>
