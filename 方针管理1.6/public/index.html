@@ -53,7 +53,33 @@
             <label>🔍 搜索:</label>
             <input type="text" id="searchInput" class="filter-input" placeholder="搜索KPI名称..." oninput="debouncedFilterData()">
         </div>
+        <div class="filter-group filter-status">
+            <label>✅ 状态:</label>
+            <div class="status-filter" id="statusFilter">
+                <button class="filter-chip active" data-status="all" onclick="setStatusFilter('all')">全部</button>
+                <button class="filter-chip" data-status="excellent" onclick="setStatusFilter('excellent')">达标</button>
+                <button class="filter-chip" data-status="good" onclick="setStatusFilter('good')">警告</button>
+                <button class="filter-chip" data-status="poor" onclick="setStatusFilter('poor')">未达标</button>
+                <button class="filter-chip" data-status="empty" onclick="setStatusFilter('empty')">空白</button>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label>↕️ 排序:</label>
+            <select id="sortFilter" class="filter-select" onchange="onSortChange()">
+                <option value="default">默认</option>
+                <option value="completion-desc">达成率高→低</option>
+                <option value="completion-asc">达成率低→高</option>
+                <option value="target-desc">目标值高→低</option>
+                <option value="target-asc">目标值低→高</option>
+                <option value="actual-desc">实际值高→低</option>
+                <option value="actual-asc">实际值低→高</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <button class="btn-ghost" id="densityToggle" onclick="toggleCompactMode()">🗂️ 紧凑模式</button>
+        </div>
     </div>
+    <div class="filter-summary" id="filterSummary"></div>
 
     <!-- 视图切换 -->
     <div class="view-tabs">

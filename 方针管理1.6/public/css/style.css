@@ -136,6 +136,91 @@ body {
     min-width: 200px;
 }
 
+.filter-status {
+    align-items: flex-start;
+}
+
+.status-filter {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--primary-color);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.filter-chip.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+    box-shadow: 0 6px 14px rgba(52, 152, 219, 0.2);
+}
+
+.btn-ghost {
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--primary-color);
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-ghost:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.btn-ghost.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.filter-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 2rem;
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.filter-summary .summary-text {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.filter-summary .summary-chips {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.summary-chip {
+    background: var(--light-bg);
+    color: var(--primary-color);
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.8rem;
+}
+
 /* 视图切换 */
 .view-tabs {
     display: flex;
@@ -213,6 +298,11 @@ body {
     gap: 1.5rem;
 }
 
+.cards-container.compact {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
 .kpi-card {
     background: white;
     border-radius: 8px;
@@ -220,6 +310,22 @@ body {
     box-shadow: var(--shadow);
     transition: all 0.3s;
     cursor: pointer;
+}
+
+.cards-container.compact .kpi-card {
+    padding: 1rem;
+}
+
+.cards-container.compact .kpi-values {
+    gap: 0.5rem;
+}
+
+.cards-container.compact .kpi-value {
+    font-size: 1.05rem;
+}
+
+.cards-container.compact .kpi-name {
+    font-size: 1rem;
 }
 
 .kpi-card:hover {
@@ -237,6 +343,10 @@ body {
 
 .kpi-card.poor {
     border-left: 4px solid var(--danger-color);
+}
+
+.kpi-card.empty {
+    border-left: 4px solid #bdc3c7;
 }
 
 .kpi-header {
@@ -310,6 +420,10 @@ body {
 
 .progress-fill.poor {
     background: var(--danger-color);
+}
+
+.progress-fill.empty {
+    background: #bdc3c7;
 }
 
 .progress-text {
@@ -519,6 +633,14 @@ body {
         min-width: 120px;
         font-size: 0.9rem;
         padding: 0.5rem;
+    }
+
+    .status-filter {
+        justify-content: flex-start;
+    }
+
+    .filter-summary {
+        padding: 0.75rem 1rem;
     }
 
     /* 视图标签 */
