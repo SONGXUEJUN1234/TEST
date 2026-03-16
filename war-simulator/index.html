@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美以联军 vs 伊朗战争模拟器</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div id="header">
+        <h1>美以联军 vs 伊朗战争模拟器</h1>
+        <div id="controls">
+            <button id="startBtn">开始模拟</button>
+            <button id="pauseBtn">暂停</button>
+            <div id="missileCounter">导弹发射: <span id="count">0</span></div>
+        </div>
+    </div>
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/military-units.js"></script>
+    <script src="js/missile-ranges.js"></script>
+    <script src="js/missile-animation.js"></script>
+    <script src="js/controls.js"></script>
+</body>
+</html>

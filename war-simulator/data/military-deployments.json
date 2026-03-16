@@ -1,0 +1,213 @@
+{
+  "factions": {
+    "coalition": {
+      "name": "美以联军",
+      "color": "blue",
+      "units": [
+        {
+          "id": "usa-5th-fleet",
+          "name": "美军第五舰队",
+          "type": "navy",
+          "location": [26.2285, 50.5877],
+          "coordinates": {"lat": 26.2285, "lng": 50.5877},
+          "country": "巴林",
+          "assets": ["航母战斗群", "驱逐舰", "潜艇"],
+          "weapons": ["战斧巡航导弹", "标准-3反导系统"],
+          "status": "active"
+        },
+        {
+          "id": "al-udeid-ab",
+          "name": "乌代德空军基地",
+          "type": "airbase",
+          "location": [25.1147, 51.2928],
+          "coordinates": {"lat": 25.1147, "lng": 51.2928},
+          "country": "卡塔尔",
+          "assets": ["B-52轰炸机", "F-15E战斗机", "KC-135加油机"],
+          "weapons": ["JDAM精确制导炸弹", "战斧巡航导弹"],
+          "status": "active"
+        },
+        {
+          "id": "nevatom-ab",
+          "name": "内瓦蒂姆空军基地",
+          "type": "airbase",
+          "location": [31.0762, 34.9469],
+          "coordinates": {"lat": 31.0762, "lng": 34.9469},
+          "country": "以色列",
+          "assets": ["F-35I战斗机", "F-15I战斗机", "预警机"],
+          "weapons": ["杰里科导弹", "SPICE精确制导炸弹"],
+          "status": "active"
+        },
+        {
+          "id": "hatzerim-ab",
+          "name": "哈特泽里姆空军基地",
+          "type": "airbase",
+          "location": [31.2931, 34.8264],
+          "coordinates": {"lat": 31.2931, "lng": 34.8264},
+          "country": "以色列",
+          "assets": ["F-16I战斗机", "无人机"],  
+          "weapons": ["杰里科导弹", "空对地导弹"],
+          "status": "active"
+        },
+        {
+          "id": "thaad-israel",
+          "name": "THAAD反导系统",
+          "type": "missile_defense",
+          "location": [31.5, 35.0],
+          "coordinates": {"lat": 31.5, "lng": 35.0},
+          "country": "以色列",
+          "assets": ["AN/TPY-2雷达", "拦截弹发射车"],
+          "weapons": ["THAAD拦截弹"],
+          "status": "alert"
+        }
+      ]
+    },
+    "iran": {
+      "name": "伊朗部队",
+      "color": "red",
+      "units": [
+        {
+          "id": "tehran-missile-base",
+          "name": "德黑兰导弹基地",
+          "type": "missile_launcher",
+          "location": [35.6892, 51.3890],
+          "coordinates": {"lat": 35.6892, "lng": 51.3890},
+          "country": "伊朗",
+          "assets": ["Shahab-3发射车", "Sejjil发射车"],
+          "weapons": ["Shahab-3弹道导弹", "Sejjil弹道导弹"],
+          "status": "active"
+        },
+        {
+          "id": "shahroud-missile-base", 
+          "name": "沙赫鲁德导弹基地",
+          "type": "missile_launcher",
+          "location": [36.4167, 54.9667],
+          "coordinates": {"lat": 36.4167, "lng": 54.9667},
+          "country": "伊朗",
+          "assets": ["Shahab-3发射车", "指挥中心"],
+          "weapons": ["Shahab-3弹道导弹"],
+          "status": "active"
+        },
+        {
+          "id": "khorramabad-naval-base",
+          "name": "霍梅尼港海军基地",
+          "type": "naval_port",
+          "location": [30.4289, 49.7592],
+          "coordinates": {"lat": 30.4289, "lng": 49.7592},
+          "country": "伊朗",
+          "assets": ["导弹快艇", "潜艇", "反舰导弹"],
+          "weapons": ["努尔反舰导弹", "波斯湾巡航导弹"],
+          "status": "active"
+        },
+        {
+          "id": "mashhad-airbase",
+          "name": "马什哈德空军基地",
+          "type": "airbase",
+          "location": [36.2625, 59.6333],
+          "coordinates": {"lat": 36.2625, "lng": 59.6333},
+          "country": "伊朗",
+          "assets": ["F-4鬼怪", "米格-29", "无人机"],
+          "weapons": ["空对地导弹", "精确制导炸弹"],
+          "status": "alert"
+        },
+        {
+          "id": "khordad-radar",
+          "name": "Khordad防空雷达站",
+          "type": "radar",
+          "location": [35.8, 51.5],
+          "coordinates": {"lat": 35.8, "lng": 51.5},
+          "country": "伊朗",
+          "assets": ["Khordad-3雷达", "防空导弹"],
+          "weapons": ["Khordad-3防空导弹"],
+          "status": "active"
+        }
+      ]
+    },
+    "proxy": {
+      "name": "代理武装",
+      "color": "orange",
+      "units": [
+        {
+          "id": "hezbollah-beirut",
+          "name": "真主党总部",
+          "type": "army",
+          "location": [33.8869, 35.5133],
+          "coordinates": {"lat": 33.8869, "lng": 35.5133},
+          "country": "黎巴嫩",
+          "assets": ["火箭炮", "反坦克导弹"],
+          "weapons": ["Fajr-5火箭弹", "Zelzal火箭弹"],
+          "status": "active"
+        },
+        {
+          "id": "hamas-gaza",
+          "name": "哈马斯加沙总部",
+          "type": "army",
+          "location": [31.5, 34.4667],
+          "coordinates": {"lat": 31.5, "lng": 34.4667},
+          "country": "巴勒斯坦",
+          "assets": ["火箭发射器", "隧道网络"],
+          "weapons": ["Qassam火箭弹", "Grad火箭弹"],
+          "status": "alert"
+        }
+      ]
+    }
+  },
+  "missile_capabilities": {
+    "coalition": {
+      "ballistic": {
+        "jericho-3": {
+          "range": 11500,
+          "payload": "核/常规",
+          "accuracy": "300m CEP",
+          "launch_platforms": ["移动发射车", "地下发射井"],
+          "count_estimate": 50
+        }
+      },
+      "cruise": {
+        "tomahawk": {
+          "range": 2500,
+          "payload": "常规",
+          "accuracy": "10m CEP", 
+          "launch_platforms": ["水面舰艇", "潜艇", "轰炸机"],
+          "count_estimate": 200
+        }
+      }
+    },
+    "iran": {
+      "ballistic": {
+        "shahab-3": {
+          "range": 1300,
+          "payload": "常规/生化",
+          "accuracy": "2500m CEP",
+          "launch_platforms": ["移动发射车", "固定阵地"],
+          "count_estimate": 100
+        },
+        "sejjil": {
+          "range": 2000,
+          "payload": "常规",
+          "accuracy": "1000m CEP",
+          "launch_platforms": ["移动发射车"],
+          "count_estimate": 50
+        }
+      },
+      "cruise": {
+        "soumar": {
+          "range": 2000,
+          "payload": "常规",
+          "accuracy": "30m CEP",
+          "launch_platforms": ["地面发射车"],
+          "count_estimate": 30
+        }
+      }
+    }
+  },
+  "metadata": {
+    "data_sources": [
+      "IISS Military Balance 2025",
+      "CSIS Missile Defense Project",
+      "Federation of American Scientists",
+      "Oryx open-source defense analysis"
+    ],
+    "last_updated": "2026-03-16",
+    "disclaimer": "此数据基于公开来源估算，仅用于教育和模拟目的"
+  }
+}
